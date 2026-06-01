@@ -1,0 +1,3 @@
+The main entry point is usually a main function in a train script.
+The training loop often lives in a trainer module with a train method.
+The model definition is typically in a model file, with supporting files for dataset loading and utilities.

@@ -1,0 +1,12 @@
+Summary: the packet suggests medium operational risk with incomplete ownership evidence.
+
+Key risk points:
+- evidence of beneficial ownership is incomplete
+- sanctions screening evidence is not fully documented
+- source-of-funds documentation remains partially missing
+
+Uncertainty:
+- some claims are not backed by explicit evidence in the packet
+- analyst review is still needed before a final decision
+
+Suggested analyst note: add citations and flag missing information before escalation.

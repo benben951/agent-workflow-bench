@@ -1,0 +1,35 @@
+{
+  "task_id": "coding-taac-entrypoint-001",
+  "title": "Explain the main TAAC training entry point",
+  "domain": "coding",
+  "objective": "Identify the main training entry point, trainer loop, and model definition in the TAAC workspace.",
+  "success_criteria": [
+    "Names the main training file or main function",
+    "Names the trainer loop or trainer class",
+    "Names the core model file or model class"
+  ],
+  "constraints": [
+    "Do not modify files",
+    "Prefer structural explanation over long paraphrase"
+  ],
+  "allowed_tools": [
+    "filesystem",
+    "codegraph",
+    "grep"
+  ],
+  "hints": [
+    "Look for train.py, trainer.py, model.py, main(), and the model class."
+  ],
+  "judge": {
+    "required_keywords": [
+      "train.py",
+      "trainer",
+      "model"
+    ],
+    "optional_keywords": [
+      "main",
+      "entry point",
+      "class"
+    ]
+  }
+}

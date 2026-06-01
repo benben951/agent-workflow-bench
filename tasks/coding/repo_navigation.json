@@ -1,0 +1,35 @@
+{
+  "task_id": "coding-repo-navigation-001",
+  "title": "Explain the main training entry point of a codebase",
+  "domain": "coding",
+  "objective": "Identify the main training loop, key model entry point, and supporting files in a repo.",
+  "success_criteria": [
+    "Names the main entry file or function",
+    "Names the core model or trainer component",
+    "Points to at least two supporting files"
+  ],
+  "constraints": [
+    "Do not modify files",
+    "Prefer structural explanation over line-by-line paraphrase"
+  ],
+  "allowed_tools": [
+    "filesystem",
+    "codegraph",
+    "grep"
+  ],
+  "hints": [
+    "Look for train.py, main(), trainer classes, and model definitions."
+  ],
+  "judge": {
+    "required_keywords": [
+      "main",
+      "train",
+      "model"
+    ],
+    "optional_keywords": [
+      "trainer",
+      "entry point",
+      "supporting files"
+    ]
+  }
+}
