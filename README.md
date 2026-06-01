@@ -54,6 +54,8 @@ This project borrows the strongest structural ideas from `affaan-m/ECC` without 
 
 Notes: [docs/ECC_NOTES.md](docs/ECC_NOTES.md)
 
+Current evidence snapshot: [docs/CURRENT_RESULTS.md](docs/CURRENT_RESULTS.md)
+
 ## Quick Start
 
 ```powershell
