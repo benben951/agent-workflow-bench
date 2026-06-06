@@ -76,3 +76,43 @@ def test_verifier_recommends_human_takeover_for_coverage_gaps() -> None:
     assert "coverage_gap" in assessment["risk_flags"]
     assert "## Human Takeover Recommendation" in report
     assert "- Recommended: True" in report
+
+
+def test_candidate_file_run_writes_verifier_takeover_artifact(tmp_path: Path) -> None:
+    out_dir = tmp_path / "runs"
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "scripts/run_benchmark.py",
+            "--task",
+            "tasks/docs/due_diligence_summary.json",
+            "--workflow",
+            "workflows/planner_executor_reviewer_verifier.json",
+            "--candidate-file",
+            "examples/due_diligence_bad_answer.txt",
+            "--out",
+            str(out_dir),
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    manifests = list(out_dir.glob("*.json"))
+    assert len(manifests) == 1
+
+    run = json.loads(manifests[0].read_text(encoding="utf-8"))["run"]
+    assert run["mode"] == "evaluated"
+    assert run["metrics"]["pass_rate"] == 0.0
+    assert run["metrics"]["human_takeover_recommended"] is True
+    assert run["metrics"]["risk_flag_count"] >= 1
+    assert run["evaluation"]["verifier"]["decision"] == "escalate_for_human_review"
+    assert "coverage_gap" in run["evaluation"]["verifier"]["risk_flags"]
+
+    verifier_report = Path(run["artifacts"]["verifier_report"])
+    assert verifier_report.exists()
+    verifier_text = verifier_report.read_text(encoding="utf-8")
+    assert "Decision: escalate_for_human_review" in verifier_text
+    assert "coverage_gap" in verifier_text

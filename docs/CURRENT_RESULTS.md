@@ -80,6 +80,32 @@ Public-safe sample artifacts:
 - `examples/simulated_run/summary.json`
 - `examples/simulated_run/summary_report.md`
 
+### Public failing verifier sample
+
+The repository also includes a deliberately weak due-diligence answer to show that the benchmark captures failure, not only polished success cases.
+
+Representative run:
+
+- `run-20260606T182009Z-63761189`
+
+Notable fields:
+
+- `mode = evaluated`
+- `status = scored`
+- `pass_rate = 0.0`
+- `evidence_coverage = 0.0`
+- `risk_flag_count = 1`
+- `human_takeover_recommended = true`
+- `failure_types = ["coverage_gap"]`
+
+Public-safe failing artifacts:
+
+- `examples/failing_run/candidate_output.txt`
+- `examples/failing_run/verifier_report.md`
+- `examples/failing_run/run_manifest.json`
+- `examples/failing_run/summary.json`
+- `examples/failing_run/summary_report.md`
+
 ### Recruiter-readable summary report
 
 The repository now converts run manifests into both JSON and Markdown summary artifacts:

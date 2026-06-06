@@ -121,6 +121,14 @@ This writes a manifest plus four reviewable artifacts:
 
 Public-safe sample artifacts are committed under [examples/simulated_run](examples/simulated_run).
 
+The repository also includes a public-safe failing sample under [examples/failing_run](examples/failing_run). It shows a weak due-diligence answer being routed to human review with:
+
+- `pass_rate = 0.0`
+- `evidence_coverage = 0.0`
+- `risk_flag_count = 1`
+- `human_takeover_recommended = true`
+- failure type: `coverage_gap`
+
 Generate a recruiter-readable summary report from run manifests:
 
 ```powershell

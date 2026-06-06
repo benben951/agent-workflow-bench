@@ -1,0 +1,46 @@
+{
+  "run_count": 1,
+  "evaluated_run_count": 1,
+  "overall": {
+    "avg_pass_rate": 0.0,
+    "avg_latency_seconds": null,
+    "avg_evidence_coverage": 0.0,
+    "human_takeover_count": 1,
+    "failure_type_counts": {
+      "coverage_gap": 1
+    }
+  },
+  "workflow_summary": [
+    {
+      "workflow_id": "planner-executor-reviewer-verifier-v1",
+      "runs": 1,
+      "evaluated_runs": 1,
+      "avg_pass_rate": 0.0,
+      "avg_latency_seconds": null,
+      "avg_evidence_coverage": 0.0,
+      "human_takeover_count": 1,
+      "failure_type_counts": {
+        "coverage_gap": 1
+      }
+    }
+  ],
+  "runs": [
+    {
+      "run_id": "run-20260606T182009Z-63761189",
+      "task_id": "docs-due-diligence-summary-001",
+      "workflow_id": "planner-executor-reviewer-verifier-v1",
+      "mode": "evaluated",
+      "status": "scored",
+      "pass_rate": 0.0,
+      "latency_seconds": null,
+      "score": 0.0,
+      "failure_types": [
+        "coverage_gap"
+      ],
+      "artifact_count": 4,
+      "evidence_coverage": 0.0,
+      "risk_flag_count": 1,
+      "human_takeover_recommended": true
+    }
+  ]
+}

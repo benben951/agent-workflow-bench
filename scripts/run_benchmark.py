@@ -145,6 +145,21 @@ def main() -> None:
 
     if candidate_path:
         candidate_text = Path(candidate_path).read_text(encoding="utf-8")
+        if args.runner == "manifest":
+            judged = evaluate_text(task, candidate_text)
+            verifier = build_verifier_assessment(task, judged, candidate_text)
+            verifier_path = ROOT / "outputs" / "verifiers" / f"{Path(args.task).stem}.md"
+            extra_artifacts["verifier_report"] = write_text_artifact(
+                verifier_path,
+                build_verifier_report(task, judged, candidate_text),
+            )
+            extra_metrics["verifier_pass"] = judged.passed
+            extra_metrics["evidence_coverage"] = verifier["evidence_coverage"]
+            extra_metrics["risk_flag_count"] = len(verifier["risk_flags"])
+            extra_metrics["human_takeover_recommended"] = verifier["human_takeover_recommended"]
+            extra_evaluation["review_mode"] = "candidate-file-plus-rubric"
+            extra_evaluation["failure_types"] = judged.failure_types
+            extra_evaluation["verifier"] = verifier
         if args.runner == "codex_pipeline":
             judged = evaluate_text(task, candidate_text)
             review_path = ROOT / "outputs" / "reviews" / f"{Path(args.task).stem}.md"
