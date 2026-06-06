@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-06-06T03:56:42.423160+00:00",
+  "generated_at": "2026-06-06T18:10:19.176639+00:00",
   "run": {
-    "run_id": "run-20260606T035642Z-2f9f4d46",
+    "run_id": "run-20260606T181019Z-0d55ff09",
     "task": {
       "task_id": "docs-due-diligence-summary-001",
       "title": "Summarize a due diligence packet with evidence and uncertainty",
@@ -76,7 +76,10 @@
       "cost_usd": null,
       "human_takeovers": 0,
       "review_findings_count": 0,
-      "verifier_pass": true
+      "verifier_pass": true,
+      "evidence_coverage": 1.0,
+      "risk_flag_count": 0,
+      "human_takeover_recommended": false
     },
     "artifacts": {
       "task_spec": "C:\\Users\\jie13\\Documents\\Playground\\agent-workflow-bench\\tasks\\docs\\due_diligence_summary.json",
@@ -104,7 +107,13 @@
       ],
       "failure_types": [],
       "review_status": "simulated-reviewer",
-      "review_mode": "simulated-reviewer-plus-rubric"
+      "review_mode": "simulated-reviewer-plus-rubric",
+      "verifier": {
+        "decision": "accept_with_notes",
+        "evidence_coverage": 1.0,
+        "risk_flags": [],
+        "human_takeover_recommended": false
+      }
     }
   }
 }

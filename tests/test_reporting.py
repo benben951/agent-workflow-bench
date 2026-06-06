@@ -6,7 +6,15 @@ from pathlib import Path
 from agent_workflow_bench.reporting import build_summary, render_markdown_report
 
 
-def write_manifest(path: Path, run_id: str, workflow_id: str, pass_rate: float | None, failure_types: list[str]) -> None:
+def write_manifest(
+    path: Path,
+    run_id: str,
+    workflow_id: str,
+    pass_rate: float | None,
+    failure_types: list[str],
+    evidence_coverage: float | None = None,
+    human_takeover: bool = False,
+) -> None:
     payload = {
         "generated_at": "2026-06-06T00:00:00+00:00",
         "run": {
@@ -20,6 +28,9 @@ def write_manifest(path: Path, run_id: str, workflow_id: str, pass_rate: float |
                 "latency_seconds": 2.5,
                 "human_takeovers": 0,
                 "verifier_pass": pass_rate == 1.0 if pass_rate is not None else None,
+                "evidence_coverage": evidence_coverage,
+                "risk_flag_count": len(failure_types),
+                "human_takeover_recommended": human_takeover,
             },
             "artifacts": {"candidate_output": "candidate.md"},
             "evaluation": {
@@ -32,8 +43,16 @@ def write_manifest(path: Path, run_id: str, workflow_id: str, pass_rate: float |
 
 
 def test_build_summary_groups_workflows_and_failure_types(tmp_path: Path) -> None:
-    write_manifest(tmp_path / "run-1.json", "run-1", "workflow-a", 1.0, [])
-    write_manifest(tmp_path / "run-2.json", "run-2", "workflow-a", 0.0, ["coverage_gap"])
+    write_manifest(tmp_path / "run-1.json", "run-1", "workflow-a", 1.0, [], evidence_coverage=1.0)
+    write_manifest(
+        tmp_path / "run-2.json",
+        "run-2",
+        "workflow-a",
+        0.0,
+        ["coverage_gap"],
+        evidence_coverage=0.667,
+        human_takeover=True,
+    )
     write_manifest(tmp_path / "run-3.json", "run-3", "workflow-b", None, ["timeout"])
 
     summary = build_summary(tmp_path)
@@ -41,11 +60,15 @@ def test_build_summary_groups_workflows_and_failure_types(tmp_path: Path) -> Non
     assert summary["run_count"] == 3
     assert summary["evaluated_run_count"] == 2
     assert summary["overall"]["avg_pass_rate"] == 0.5
+    assert summary["overall"]["avg_evidence_coverage"] == 0.834
+    assert summary["overall"]["human_takeover_count"] == 1
     assert summary["overall"]["failure_type_counts"] == {"coverage_gap": 1, "timeout": 1}
     workflow_a = next(item for item in summary["workflow_summary"] if item["workflow_id"] == "workflow-a")
     assert workflow_a["runs"] == 2
     assert workflow_a["evaluated_runs"] == 2
     assert workflow_a["avg_pass_rate"] == 0.5
+    assert workflow_a["avg_evidence_coverage"] == 0.834
+    assert workflow_a["human_takeover_count"] == 1
 
 
 def test_build_summary_ignores_summary_json_artifacts(tmp_path: Path) -> None:
@@ -72,3 +95,5 @@ def test_render_markdown_report_contains_recruiter_readable_sections(tmp_path: P
     assert "workflow-a" in markdown
     assert "coverage_gap" in markdown
     assert "avg pass rate" in markdown.lower()
+    assert "Avg evidence coverage" in markdown
+    assert "Human takeover" in markdown

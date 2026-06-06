@@ -6,6 +6,13 @@ from agent_workflow_bench.judges import JudgeResult
 from agent_workflow_bench.models import TaskSpec, WorkflowSpec
 
 
+RISK_TERMS = {
+    "fabricated_citation": ["fabricated citation", "fake citation", "made-up citation"],
+    "missing_evidence": ["missing evidence", "insufficient evidence", "not enough evidence"],
+    "unsafe_certainty": ["definitely", "guaranteed", "no risk", "approved"],
+}
+
+
 def build_planner_prompt(task: TaskSpec, workflow: WorkflowSpec) -> str:
     role_names = " -> ".join(role.role for role in workflow.roles)
     lines = [
@@ -140,16 +147,60 @@ def build_simulated_candidate_text(task: TaskSpec, plan_text: str) -> str:
     return "\n".join(lines)
 
 
-def build_verifier_report(task: TaskSpec, judge: JudgeResult) -> str:
+def build_verifier_assessment(task: TaskSpec, judge: JudgeResult, candidate_text: str) -> dict:
+    lower = candidate_text.lower()
+    total_keywords = len(judge.matched_keywords) + len(judge.missing_keywords)
+    evidence_coverage = 1.0 if total_keywords == 0 else round(len(judge.matched_keywords) / total_keywords, 3)
+
+    risk_flags: list[str] = []
+    if judge.missing_keywords:
+        risk_flags.append("coverage_gap")
+    for flag, terms in RISK_TERMS.items():
+        if any(term in lower for term in terms):
+            risk_flags.append(flag)
+
+    # "Flag missing evidence" is a safe caveat, not a risk by itself.
+    if "missing_evidence" in risk_flags and "flag missing evidence" in lower:
+        risk_flags.remove("missing_evidence")
+
+    human_takeover = (not judge.passed) or any(flag in risk_flags for flag in {"fabricated_citation", "unsafe_certainty"})
+    decision = "escalate_for_human_review" if human_takeover else "accept_with_notes"
+
+    return {
+        "decision": decision,
+        "evidence_coverage": evidence_coverage,
+        "risk_flags": risk_flags,
+        "human_takeover_recommended": human_takeover,
+    }
+
+
+def build_verifier_report(task: TaskSpec, judge: JudgeResult, candidate_text: str = "") -> str:
+    assessment = build_verifier_assessment(task, judge, candidate_text)
     verdict = "PASS" if judge.passed else "FAIL"
     lines = [
         f"# Verifier Report for {task.task_id}",
         "",
         f"Verdict: {verdict}",
         f"Score: {judge.score}",
+        f"Decision: {assessment['decision']}",
         "",
-        "## Matched Keywords",
+        "## Evidence Coverage",
+        f"- Coverage: {assessment['evidence_coverage']}",
+        f"- Matched signals: {len(judge.matched_keywords)}",
+        f"- Missing signals: {len(judge.missing_keywords)}",
+        "",
+        "## Risk Flags",
     ]
+    lines.extend([f"- {item}" for item in assessment["risk_flags"]] or ["- None"])
+    lines.extend(
+        [
+            "",
+            "## Human Takeover Recommendation",
+            f"- Recommended: {assessment['human_takeover_recommended']}",
+            "",
+            "## Matched Keywords",
+        ]
+    )
     lines.extend([f"- {item}" for item in judge.matched_keywords] or ["- None"])
     lines.extend(["", "## Missing Keywords"])
     lines.extend([f"- {item}" for item in judge.missing_keywords] or ["- None"])

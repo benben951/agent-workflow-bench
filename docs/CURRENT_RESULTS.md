@@ -11,7 +11,7 @@ The project currently supports three useful result categories:
 - reproducible simulated planner-executor-reviewer-verifier runs
 - live Codex-backed execution attempts
 
-The most important outcome is that the project no longer stops at static prompts or README claims. It now records real execution artifacts and timing.
+The most important outcome is that the project no longer stops at static prompts or README claims. It now records real execution artifacts, timing, verifier evidence coverage, and human-takeover recommendations.
 
 ## Evidence Produced
 
@@ -57,7 +57,7 @@ The repository now includes a model-free simulated planner-executor-reviewer-ver
 
 Representative run:
 
-- `run-20260606T035642Z-2f9f4d46`
+- `run-20260606T181019Z-0d55ff09`
 
 Notable fields:
 
@@ -65,7 +65,10 @@ Notable fields:
 - `status = reviewed`
 - `pass_rate = 1.0`
 - `verifier_pass = true`
-- artifacts: planner note, candidate output, review note, verifier report
+- `evidence_coverage = 1.0`
+- `risk_flag_count = 0`
+- `human_takeover_recommended = false`
+- artifacts: planner note, candidate output, review note, verifier report with evidence coverage and risk flags
 
 Public-safe sample artifacts:
 
@@ -94,6 +97,8 @@ Current public sample summary:
 - evaluated run count: `1`
 - average pass rate: `1.0`
 - average latency seconds: `0.0`
+- average evidence coverage: `1.0`
+- human takeover recommended: `0`
 - workflow: `planner-executor-reviewer-verifier-v1`
 - artifact count: `6`
 
@@ -108,13 +113,13 @@ This is not enough data for strong claims yet, but it is enough to show that:
 
 - workflow variants can be compared
 - success and failure are both captured
-- timing and artifact paths are logged
+- timing, evidence coverage, risk flags, human-takeover recommendations, and artifact paths are logged
 - a public-safe simulated pipeline can be reproduced without external model access
 
 ## Next Improvements
 
 - add one more task family beyond repository explanation and due-diligence summary
-- record reviewer output quality more explicitly
+- add reviewer disagreement and override fields
 - compare generated Markdown reports across workflow variants
 - compare Codex-only against Codex pipeline on the same task set with fixed budgets
-- add a metrics summary JSON similar to Agent Trust Lab for recruiter-readable evaluation snapshots
+- add more cross-task sample manifests so evidence coverage and human-takeover metrics can be compared across workflows

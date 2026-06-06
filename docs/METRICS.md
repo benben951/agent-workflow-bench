@@ -14,6 +14,9 @@
 - `review_findings_count`: number of issues raised by the reviewer
 - `review_fix_required`: whether the reviewer forced a retry
 - `verifier_pass`: whether a verifier or rubric check approved the output
+- `evidence_coverage`: share of task-specific verifier signals found in the candidate output
+- `risk_flag_count`: number of verifier risk flags such as coverage gaps, fabricated-citation signals, or unsafe certainty
+- `human_takeover_recommended`: whether the verifier recommends human review before relying on the output
 
 ## Safety Metrics
 

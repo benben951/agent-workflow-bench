@@ -19,6 +19,7 @@ from agent_workflow_bench.pipeline import (
     build_review_prompt,
     build_review_text,
     build_simulated_candidate_text,
+    build_verifier_assessment,
     build_verifier_report,
     write_text_artifact,
 )
@@ -63,8 +64,9 @@ def main() -> None:
         plan_text = build_plan_text(task, workflow)
         candidate_text = build_simulated_candidate_text(task, plan_text)
         judged = evaluate_text(task, candidate_text)
+        verifier = build_verifier_assessment(task, judged, candidate_text)
         review_text = build_review_text(task, judged, candidate_text)
-        verifier_text = build_verifier_report(task, judged)
+        verifier_text = build_verifier_report(task, judged, candidate_text)
 
         extra_artifacts["planner_note"] = write_text_artifact(plan_path, plan_text)
         extra_artifacts["candidate_output"] = write_text_artifact(candidate_path, candidate_text)
@@ -73,9 +75,13 @@ def main() -> None:
         extra_metrics["latency_seconds"] = 0.0
         extra_metrics["review_findings_count"] = len(judged.missing_keywords)
         extra_metrics["verifier_pass"] = judged.passed
+        extra_metrics["evidence_coverage"] = verifier["evidence_coverage"]
+        extra_metrics["risk_flag_count"] = len(verifier["risk_flags"])
+        extra_metrics["human_takeover_recommended"] = verifier["human_takeover_recommended"]
         extra_evaluation["review_status"] = "simulated-reviewer"
         extra_evaluation["review_mode"] = "simulated-reviewer-plus-rubric"
         extra_evaluation["failure_types"] = judged.failure_types
+        extra_evaluation["verifier"] = verifier
 
     if args.runner in {"codex", "codex_pipeline"}:
         if not args.cwd:
@@ -163,8 +169,18 @@ def main() -> None:
                 extra_evaluation["review_status"] = review_result.status
             extra_metrics["review_findings_count"] = len(judged.missing_keywords)
             extra_metrics["verifier_pass"] = judged.passed
+            verifier = build_verifier_assessment(task, judged, candidate_text)
+            verifier_path = ROOT / "outputs" / "verifiers" / f"{Path(args.task).stem}.md"
+            extra_artifacts["verifier_report"] = write_text_artifact(
+                verifier_path,
+                build_verifier_report(task, judged, candidate_text),
+            )
+            extra_metrics["evidence_coverage"] = verifier["evidence_coverage"]
+            extra_metrics["risk_flag_count"] = len(verifier["risk_flags"])
+            extra_metrics["human_takeover_recommended"] = verifier["human_takeover_recommended"]
             extra_evaluation["review_mode"] = "codex-reviewer-plus-rubric"
             extra_evaluation["failure_types"] = judged.failure_types
+            extra_evaluation["verifier"] = verifier
 
     run_path = build_run_manifest(
         args.task,

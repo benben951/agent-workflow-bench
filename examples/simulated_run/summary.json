@@ -4,6 +4,8 @@
   "overall": {
     "avg_pass_rate": 1.0,
     "avg_latency_seconds": 0.0,
+    "avg_evidence_coverage": 1.0,
+    "human_takeover_count": 0,
     "failure_type_counts": {}
   },
   "workflow_summary": [
@@ -13,12 +15,14 @@
       "evaluated_runs": 1,
       "avg_pass_rate": 1.0,
       "avg_latency_seconds": 0.0,
+      "avg_evidence_coverage": 1.0,
+      "human_takeover_count": 0,
       "failure_type_counts": {}
     }
   ],
   "runs": [
     {
-      "run_id": "run-20260606T035642Z-2f9f4d46",
+      "run_id": "run-20260606T181019Z-0d55ff09",
       "task_id": "docs-due-diligence-summary-001",
       "workflow_id": "planner-executor-reviewer-verifier-v1",
       "mode": "simulated-pipeline",
@@ -27,7 +31,10 @@
       "latency_seconds": 0.0,
       "score": 1.0,
       "failure_types": [],
-      "artifact_count": 6
+      "artifact_count": 6,
+      "evidence_coverage": 1.0,
+      "risk_flag_count": 0,
+      "human_takeover_recommended": false
     }
   ]
 }

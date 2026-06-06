@@ -43,6 +43,8 @@ def build_summary(run_dir: str | Path) -> dict[str, Any]:
     failure_counts: Counter[str] = Counter()
     pass_rates: list[float] = []
     latencies: list[float] = []
+    evidence_coverages: list[float] = []
+    takeover_count = 0
 
     for run in iter_run_manifests(run_dir):
         workflow_id = run["workflow"]["workflow_id"]
@@ -50,12 +52,18 @@ def build_summary(run_dir: str | Path) -> dict[str, Any]:
         evaluation = run.get("evaluation", {})
         pass_rate = _safe_float(metrics.get("pass_rate"))
         latency = _safe_float(metrics.get("latency_seconds"))
+        evidence_coverage = _safe_float(metrics.get("evidence_coverage"))
+        human_takeover = bool(metrics.get("human_takeover_recommended"))
         failure_types = list(evaluation.get("failure_types", []) or [])
 
         if pass_rate is not None:
             pass_rates.append(pass_rate)
         if latency is not None:
             latencies.append(latency)
+        if evidence_coverage is not None:
+            evidence_coverages.append(evidence_coverage)
+        if human_takeover:
+            takeover_count += 1
         failure_counts.update(failure_types)
 
         row = {
@@ -69,6 +77,9 @@ def build_summary(run_dir: str | Path) -> dict[str, Any]:
             "score": evaluation.get("score") if evaluation else None,
             "failure_types": failure_types,
             "artifact_count": len(run.get("artifacts", {})),
+            "evidence_coverage": evidence_coverage,
+            "risk_flag_count": metrics.get("risk_flag_count"),
+            "human_takeover_recommended": human_takeover,
         }
         runs.append(row)
         workflow_buckets.setdefault(workflow_id, []).append(row)
@@ -78,6 +89,8 @@ def build_summary(run_dir: str | Path) -> dict[str, Any]:
         workflow_pass_rates = [row["pass_rate"] for row in rows if row["pass_rate"] is not None]
         workflow_latencies = [row["latency_seconds"] for row in rows if row["latency_seconds"] is not None]
         workflow_failures: Counter[str] = Counter()
+        workflow_coverages = [row["evidence_coverage"] for row in rows if row["evidence_coverage"] is not None]
+        workflow_takeovers = sum(1 for row in rows if row["human_takeover_recommended"])
         for row in rows:
             workflow_failures.update(row["failure_types"])
         workflow_summary.append(
@@ -87,6 +100,8 @@ def build_summary(run_dir: str | Path) -> dict[str, Any]:
                 "evaluated_runs": len(workflow_pass_rates),
                 "avg_pass_rate": _avg(workflow_pass_rates),
                 "avg_latency_seconds": _avg(workflow_latencies),
+                "avg_evidence_coverage": _avg(workflow_coverages),
+                "human_takeover_count": workflow_takeovers,
                 "failure_type_counts": dict(sorted(workflow_failures.items())),
             }
         )
@@ -97,6 +112,8 @@ def build_summary(run_dir: str | Path) -> dict[str, Any]:
         "overall": {
             "avg_pass_rate": _avg(pass_rates),
             "avg_latency_seconds": _avg(latencies),
+            "avg_evidence_coverage": _avg(evidence_coverages),
+            "human_takeover_count": takeover_count,
             "failure_type_counts": dict(sorted(failure_counts.items())),
         },
         "workflow_summary": workflow_summary,
@@ -120,6 +137,8 @@ def render_markdown_report(summary: dict[str, Any], title: str = "Agent Workflow
         f"- Evaluated run count: {summary['evaluated_run_count']}",
         f"- Avg pass rate: {_fmt(summary['overall']['avg_pass_rate'])}",
         f"- Avg latency seconds: {_fmt(summary['overall']['avg_latency_seconds'])}",
+        f"- Avg evidence coverage: {_fmt(summary['overall'].get('avg_evidence_coverage'))}",
+        f"- Human takeover recommended: {_fmt(summary['overall'].get('human_takeover_count'))}",
         "",
         "## Failure Types",
         "",
@@ -135,19 +154,21 @@ def render_markdown_report(summary: dict[str, Any], title: str = "Agent Workflow
             "",
             "## Workflow Summary",
             "",
-            "| Workflow | Runs | Evaluated | Avg pass rate | Avg latency seconds | Failure types |",
-            "|---|---:|---:|---:|---:|---|",
+            "| Workflow | Runs | Evaluated | Avg pass rate | Avg latency seconds | Avg evidence coverage | Human takeovers | Failure types |",
+            "|---|---:|---:|---:|---:|---:|---:|---|",
         ]
     )
     for item in summary["workflow_summary"]:
         failures = ", ".join(f"{name}:{count}" for name, count in item["failure_type_counts"].items()) or "None"
         lines.append(
-            "| {workflow_id} | {runs} | {evaluated_runs} | {avg_pass_rate} | {avg_latency_seconds} | {failures} |".format(
+            "| {workflow_id} | {runs} | {evaluated_runs} | {avg_pass_rate} | {avg_latency_seconds} | {avg_evidence_coverage} | {human_takeover_count} | {failures} |".format(
                 workflow_id=item["workflow_id"],
                 runs=item["runs"],
                 evaluated_runs=item["evaluated_runs"],
                 avg_pass_rate=_fmt(item["avg_pass_rate"]),
                 avg_latency_seconds=_fmt(item["avg_latency_seconds"]),
+                avg_evidence_coverage=_fmt(item.get("avg_evidence_coverage")),
+                human_takeover_count=_fmt(item.get("human_takeover_count")),
                 failures=failures,
             )
         )
@@ -157,20 +178,22 @@ def render_markdown_report(summary: dict[str, Any], title: str = "Agent Workflow
             "",
             "## Run Details",
             "",
-            "| Run | Task | Workflow | Mode | Status | Pass rate | Score | Failure types | Artifacts |",
-            "|---|---|---|---|---|---:|---:|---|---:|",
+            "| Run | Task | Workflow | Mode | Status | Pass rate | Evidence coverage | Human takeover | Score | Failure types | Artifacts |",
+            "|---|---|---|---|---|---:|---:|---|---:|---|---:|",
         ]
     )
     for run in summary["runs"]:
         failures = ", ".join(run["failure_types"]) or "None"
         lines.append(
-            "| {run_id} | {task_id} | {workflow_id} | {mode} | {status} | {pass_rate} | {score} | {failures} | {artifact_count} |".format(
+            "| {run_id} | {task_id} | {workflow_id} | {mode} | {status} | {pass_rate} | {evidence_coverage} | {human_takeover} | {score} | {failures} | {artifact_count} |".format(
                 run_id=run["run_id"],
                 task_id=run["task_id"],
                 workflow_id=run["workflow_id"],
                 mode=run["mode"],
                 status=run["status"],
                 pass_rate=_fmt(run["pass_rate"]),
+                evidence_coverage=_fmt(run.get("evidence_coverage")),
+                human_takeover=_fmt(run.get("human_takeover_recommended")),
                 score=_fmt(run["score"]),
                 failures=failures,
                 artifact_count=run["artifact_count"],

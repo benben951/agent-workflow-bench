@@ -26,6 +26,7 @@ This repository is an evaluation-first scaffold for benchmarking agent workflows
 - It is influenced by operating-system-style agent stacks such as ECC, but stays intentionally smaller and more benchmark-first.
 - It now supports simple rubric scoring against candidate output files, so runs can move beyond pure dry-run manifests.
 - It now includes a reproducible simulated planner-executor-reviewer-verifier pipeline that generates reviewable artifacts without requiring external model access.
+- The verifier now records evidence coverage, risk flags, and human-takeover recommendations so workflow quality is auditable beyond a simple pass/fail label.
 
 ## Core Idea
 
@@ -42,6 +43,7 @@ The system records:
 - prompts and routing policy
 - artifact paths
 - pass or fail against a task-specific rubric
+- evidence coverage and risk flags from the verifier
 - latency and cost placeholders
 - human takeover count
 
@@ -115,7 +117,7 @@ This writes a manifest plus four reviewable artifacts:
 - planner note
 - candidate output
 - reviewer note
-- verifier report
+- verifier report with evidence coverage, risk flags, and human-takeover recommendation
 
 Public-safe sample artifacts are committed under [examples/simulated_run](examples/simulated_run).
 
@@ -164,4 +166,4 @@ It is a natural follow-on from `hermes-control-plane`, `llm-proxy-auditor`, and 
 
 ## Resume Angle
 
-Built a multi-agent workflow benchmark that compares planner-executor-reviewer-verifier pipelines across coding and knowledge-work tasks using pass-rate, latency, failure taxonomy, verifier artifacts, summary JSON, and recruiter-readable Markdown reports.
+Built a multi-agent workflow benchmark that compares planner-executor-reviewer-verifier pipelines across coding and knowledge-work tasks using pass-rate, latency, evidence coverage, risk flags, human-takeover recommendations, verifier artifacts, summary JSON, and recruiter-readable Markdown reports.
