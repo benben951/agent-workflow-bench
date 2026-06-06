@@ -119,6 +119,17 @@ This writes a manifest plus four reviewable artifacts:
 
 Public-safe sample artifacts are committed under [examples/simulated_run](examples/simulated_run).
 
+Generate a recruiter-readable summary report from run manifests:
+
+```powershell
+python scripts/summarize_results.py `
+  --runs examples/simulated_run `
+  --json-out examples/simulated_run/summary.json `
+  --markdown-out examples/simulated_run/summary_report.md
+```
+
+Sample report: [examples/simulated_run/summary_report.md](examples/simulated_run/summary_report.md)
+
 ## Suggested Task Families
 
 - coding bugfix tasks
@@ -138,6 +149,7 @@ Public-safe sample artifacts are committed under [examples/simulated_run](exampl
 - `evaluated`: scores a candidate output file against task-specific rubric keywords
 - `simulated-pipeline`: generates planner, executor, reviewer, and verifier artifacts without external model access
 - `codex-evaluated`: uses Codex as the executor and then scores the output
+- `reported`: summarizes run manifests into JSON and Markdown reports for workflow comparison
 
 ## Why It Fits This Portfolio
 
@@ -152,4 +164,4 @@ It is a natural follow-on from `hermes-control-plane`, `llm-proxy-auditor`, and 
 
 ## Resume Angle
 
-Built a multi-agent workflow benchmark that compares planner-executor-reviewer pipelines across coding and knowledge-work tasks using pass-rate, latency, cost, and safety-oriented run artifacts.
+Built a multi-agent workflow benchmark that compares planner-executor-reviewer-verifier pipelines across coding and knowledge-work tasks using pass-rate, latency, failure taxonomy, verifier artifacts, summary JSON, and recruiter-readable Markdown reports.

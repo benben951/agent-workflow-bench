@@ -74,6 +74,28 @@ Public-safe sample artifacts:
 - `examples/simulated_run/review_note.md`
 - `examples/simulated_run/verifier_report.md`
 - `examples/simulated_run/run_manifest.json`
+- `examples/simulated_run/summary.json`
+- `examples/simulated_run/summary_report.md`
+
+### Recruiter-readable summary report
+
+The repository now converts run manifests into both JSON and Markdown summary artifacts:
+
+```powershell
+python scripts/summarize_results.py `
+  --runs examples/simulated_run `
+  --json-out examples/simulated_run/summary.json `
+  --markdown-out examples/simulated_run/summary_report.md
+```
+
+Current public sample summary:
+
+- run count: `1`
+- evaluated run count: `1`
+- average pass rate: `1.0`
+- average latency seconds: `0.0`
+- workflow: `planner-executor-reviewer-verifier-v1`
+- artifact count: `6`
 
 ## Workflow Snapshot
 
@@ -93,6 +115,6 @@ This is not enough data for strong claims yet, but it is enough to show that:
 
 - add one more task family beyond repository explanation and due-diligence summary
 - record reviewer output quality more explicitly
-- add a compact markdown report generator from run manifests
+- compare generated Markdown reports across workflow variants
 - compare Codex-only against Codex pipeline on the same task set with fixed budgets
 - add a metrics summary JSON similar to Agent Trust Lab for recruiter-readable evaluation snapshots
