@@ -1,5 +1,7 @@
 # Agent Workflow Bench
 
+[![CI](https://github.com/benben951/agent-workflow-bench/actions/workflows/ci.yml/badge.svg)](https://github.com/benben951/agent-workflow-bench/actions/workflows/ci.yml)
+
 Benchmark planner-executor-reviewer agent workflows on real coding and knowledge-work tasks.
 
 ## Why This Project Is Worth Building
@@ -23,6 +25,7 @@ This repository is an evaluation-first scaffold for benchmarking agent workflows
 - The current implementation is a dry-run baseline that creates reproducible run artifacts before real agent adapters are added.
 - It is influenced by operating-system-style agent stacks such as ECC, but stays intentionally smaller and more benchmark-first.
 - It now supports simple rubric scoring against candidate output files, so runs can move beyond pure dry-run manifests.
+- It now includes a reproducible simulated planner-executor-reviewer-verifier pipeline that generates reviewable artifacts without requiring external model access.
 
 ## Core Idea
 
@@ -97,6 +100,25 @@ python scripts/run_benchmark.py `
   --out outputs/runs
 ```
 
+Run the reproducible simulated multi-agent pipeline:
+
+```powershell
+python scripts/run_benchmark.py `
+  --task tasks/docs/due_diligence_summary.json `
+  --workflow workflows/planner_executor_reviewer_verifier.json `
+  --runner simulated_pipeline `
+  --out outputs/runs
+```
+
+This writes a manifest plus four reviewable artifacts:
+
+- planner note
+- candidate output
+- reviewer note
+- verifier report
+
+Public-safe sample artifacts are committed under [examples/simulated_run](examples/simulated_run).
+
 ## Suggested Task Families
 
 - coding bugfix tasks
@@ -114,6 +136,7 @@ python scripts/run_benchmark.py `
 
 - `dry-run`: generates a manifest and records the intended workflow
 - `evaluated`: scores a candidate output file against task-specific rubric keywords
+- `simulated-pipeline`: generates planner, executor, reviewer, and verifier artifacts without external model access
 - `codex-evaluated`: uses Codex as the executor and then scores the output
 
 ## Why It Fits This Portfolio

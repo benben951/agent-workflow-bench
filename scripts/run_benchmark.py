@@ -18,6 +18,8 @@ from agent_workflow_bench.pipeline import (
     build_planner_prompt,
     build_review_prompt,
     build_review_text,
+    build_simulated_candidate_text,
+    build_verifier_report,
     write_text_artifact,
 )
 from agent_workflow_bench.runners import run_codex_executor, run_codex_prompt
@@ -29,7 +31,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--workflow", required=True, help="Path to a workflow JSON file")
     parser.add_argument("--out", default="outputs/runs", help="Directory for generated run manifests")
     parser.add_argument("--candidate-file", help="Optional path to a candidate output text file for rubric scoring")
-    parser.add_argument("--runner", choices=["manifest", "codex", "codex_pipeline"], default="manifest", help="How to produce the candidate output")
+    parser.add_argument(
+        "--runner",
+        choices=["manifest", "simulated_pipeline", "codex", "codex_pipeline"],
+        default="manifest",
+        help="How to produce the candidate output",
+    )
     parser.add_argument("--cwd", help="Workspace directory for agent execution")
     parser.add_argument("--runner-timeout", type=int, default=120, help="Timeout in seconds for live runner execution")
     return parser.parse_args()
@@ -45,6 +52,30 @@ def main() -> None:
     extra_metrics: dict[str, object] = {}
     extra_evaluation: dict[str, object] = {}
     log_root = ROOT / "outputs" / "logs"
+
+    if args.runner == "simulated_pipeline":
+        artifact_root = ROOT / "outputs" / "simulated" / task.task_id
+        plan_path = artifact_root / "planner_note.md"
+        candidate_path = str((artifact_root / "candidate_output.md").resolve())
+        review_path = artifact_root / "review_note.md"
+        verifier_path = artifact_root / "verifier_report.md"
+
+        plan_text = build_plan_text(task, workflow)
+        candidate_text = build_simulated_candidate_text(task, plan_text)
+        judged = evaluate_text(task, candidate_text)
+        review_text = build_review_text(task, judged, candidate_text)
+        verifier_text = build_verifier_report(task, judged)
+
+        extra_artifacts["planner_note"] = write_text_artifact(plan_path, plan_text)
+        extra_artifacts["candidate_output"] = write_text_artifact(candidate_path, candidate_text)
+        extra_artifacts["review_note"] = write_text_artifact(review_path, review_text)
+        extra_artifacts["verifier_report"] = write_text_artifact(verifier_path, verifier_text)
+        extra_metrics["latency_seconds"] = 0.0
+        extra_metrics["review_findings_count"] = len(judged.missing_keywords)
+        extra_metrics["verifier_pass"] = judged.passed
+        extra_evaluation["review_status"] = "simulated-reviewer"
+        extra_evaluation["review_mode"] = "simulated-reviewer-plus-rubric"
+        extra_evaluation["failure_types"] = judged.failure_types
 
     if args.runner in {"codex", "codex_pipeline"}:
         if not args.cwd:
@@ -141,8 +172,12 @@ def main() -> None:
         args.out,
         candidate_text=candidate_text,
         candidate_path=candidate_path,
-        mode="codex-evaluated" if args.runner == "codex" and candidate_text else None,
-        status="reviewed" if args.runner == "codex_pipeline" and candidate_text else None,
+        mode=(
+            "simulated-pipeline"
+            if args.runner == "simulated_pipeline" and candidate_text
+            else "codex-evaluated" if args.runner == "codex" and candidate_text else None
+        ),
+        status="reviewed" if args.runner in {"simulated_pipeline", "codex_pipeline"} and candidate_text else None,
         extra_metrics=extra_metrics,
         extra_artifacts=extra_artifacts,
         extra_evaluation=extra_evaluation,

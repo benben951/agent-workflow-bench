@@ -112,6 +112,54 @@ def build_review_text(task: TaskSpec, judge: JudgeResult, candidate_text: str) -
     return "\n".join(lines)
 
 
+def build_simulated_candidate_text(task: TaskSpec, plan_text: str) -> str:
+    lines = [
+        f"# Candidate Output for {task.task_id}",
+        "",
+        "## Concise Summary",
+        f"This simulated executor output addresses the objective: {task.objective}",
+        "",
+        "## Evidence-backed Risk Points",
+    ]
+    criteria = task.success_criteria or ["Provide a direct answer tied to the task objective."]
+    for index, item in enumerate(criteria, start=1):
+        lines.append(f"{index}. Risk and evidence note: {item}")
+    lines.extend(
+        [
+            "",
+            "## Uncertainty and Missing Information",
+            "Uncertainty remains where source evidence is incomplete. Missing information should be flagged for analyst review instead of guessed.",
+            "",
+            "## Analyst-Readable Next Step",
+            "Use this output as a reviewable draft, then apply the verifier rubric before relying on it.",
+            "",
+            "## Planner Trace",
+            plan_text[:1000],
+        ]
+    )
+    return "\n".join(lines)
+
+
+def build_verifier_report(task: TaskSpec, judge: JudgeResult) -> str:
+    verdict = "PASS" if judge.passed else "FAIL"
+    lines = [
+        f"# Verifier Report for {task.task_id}",
+        "",
+        f"Verdict: {verdict}",
+        f"Score: {judge.score}",
+        "",
+        "## Matched Keywords",
+    ]
+    lines.extend([f"- {item}" for item in judge.matched_keywords] or ["- None"])
+    lines.extend(["", "## Missing Keywords"])
+    lines.extend([f"- {item}" for item in judge.missing_keywords] or ["- None"])
+    lines.extend(["", "## Failure Types"])
+    lines.extend([f"- {item}" for item in judge.failure_types] or ["- None"])
+    lines.extend(["", "## Notes"])
+    lines.extend([f"- {item}" for item in judge.notes] or ["- No verifier notes."])
+    return "\n".join(lines)
+
+
 def write_text_artifact(path: str | Path, content: str) -> str:
     out = Path(path)
     out.parent.mkdir(parents=True, exist_ok=True)
