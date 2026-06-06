@@ -1,0 +1,24 @@
+{
+  "workflow_id": "planner-executor-reviewer-v1",
+  "title": "Planner, executor, reviewer",
+  "roles": [
+    {
+      "role": "planner",
+      "agent": "claude",
+      "purpose": "Break the task into a compact execution plan."
+    },
+    {
+      "role": "executor",
+      "agent": "codex",
+      "purpose": "Use tools and produce the working output."
+    },
+    {
+      "role": "reviewer",
+      "agent": "claude",
+      "purpose": "Check quality, gaps, and safety before final delivery."
+    }
+  ],
+  "notes": [
+    "Use as the baseline multi-agent workflow for comparison."
+  ]
+}

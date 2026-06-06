@@ -1,0 +1,36 @@
+{
+  "task_id": "docs-due-diligence-summary-001",
+  "title": "Summarize a due diligence packet with evidence and uncertainty",
+  "domain": "docs",
+  "objective": "Produce a short due diligence summary that preserves citations, key risks, and explicit uncertainty notes.",
+  "success_criteria": [
+    "Includes a concise summary",
+    "Includes at least three evidence-backed risk points",
+    "States uncertainty or missing-information caveats"
+  ],
+  "constraints": [
+    "Do not fabricate citations",
+    "Flag missing evidence instead of guessing",
+    "Prefer analyst-readable structure"
+  ],
+  "allowed_tools": [
+    "filesystem",
+    "retrieval",
+    "rubric_judge"
+  ],
+  "hints": [
+    "Treat evidence tracing and uncertainty handling as part of task success."
+  ],
+  "judge": {
+    "required_keywords": [
+      "risk",
+      "evidence",
+      "uncertainty"
+    ],
+    "optional_keywords": [
+      "citation",
+      "missing information",
+      "analyst"
+    ]
+  }
+}

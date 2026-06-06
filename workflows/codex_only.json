@@ -1,0 +1,14 @@
+{
+  "workflow_id": "codex-only-v1",
+  "title": "Codex only baseline",
+  "roles": [
+    {
+      "role": "executor",
+      "agent": "codex",
+      "purpose": "Handle the task end-to-end without a separate planner or reviewer."
+    }
+  ],
+  "notes": [
+    "Use as the single-agent baseline against multi-agent workflows."
+  ]
+}

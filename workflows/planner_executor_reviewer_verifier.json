@@ -1,0 +1,29 @@
+{
+  "workflow_id": "planner-executor-reviewer-verifier-v1",
+  "title": "Planner, executor, reviewer, verifier",
+  "roles": [
+    {
+      "role": "planner",
+      "agent": "claude",
+      "purpose": "Break the task into a compact execution plan."
+    },
+    {
+      "role": "executor",
+      "agent": "codex",
+      "purpose": "Use tools and produce the working output."
+    },
+    {
+      "role": "reviewer",
+      "agent": "claude",
+      "purpose": "Check quality, gaps, and obvious defects."
+    },
+    {
+      "role": "verifier",
+      "agent": "rubric_judge",
+      "purpose": "Apply task-specific acceptance checks and safety rules."
+    }
+  ],
+  "notes": [
+    "Use for high-trust tasks that benefit from an explicit verification stage."
+  ]
+}
