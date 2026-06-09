@@ -4,6 +4,40 @@
 
 Benchmark planner-executor-reviewer agent workflows on real coding and knowledge-work tasks.
 
+Agent Workflow Bench is a small evaluation harness for answering a practical question:
+
+> Does a multi-agent workflow actually improve quality, evidence coverage, and safety, or does it only add cost and latency?
+
+It gives you reproducible task specs, workflow specs, run manifests, verifier artifacts, summary reports, and failing examples before you connect expensive live models.
+
+## What You Can Do With It
+
+- Compare single-agent and planner-executor-reviewer-verifier workflows.
+- Generate public-safe run manifests and review artifacts without external model access.
+- Score candidate outputs against task rubrics.
+- Track evidence coverage, risk flags, pass rate, and human-takeover recommendations.
+- Create recruiter- or maintainer-readable Markdown summaries from run artifacts.
+
+## 60-Second Quickstart
+
+```powershell
+git clone https://github.com/benben951/agent-workflow-bench.git
+cd agent-workflow-bench
+python -m pip install -e .
+
+python scripts/run_benchmark.py `
+  --task tasks/docs/due_diligence_summary.json `
+  --workflow workflows/planner_executor_reviewer_verifier.json `
+  --runner simulated_pipeline `
+  --out outputs/runs
+```
+
+The command writes a manifest plus planner, executor, reviewer, and verifier artifacts. For committed examples, start with [examples/simulated_run/summary_report.md](examples/simulated_run/summary_report.md) and [examples/failing_run](examples/failing_run).
+
+## Why Star This Repo
+
+Star it if you want a compact benchmark-first template for multi-agent workflow evaluation, especially when you care about audit trails, verifier output, evidence coverage, and human takeover instead of only demo screenshots.
+
 ## Why This Project Is Worth Building
 
 Single-agent demos are easy to find. What is still missing is a practical way to answer questions like:
